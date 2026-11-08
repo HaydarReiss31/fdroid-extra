@@ -416,6 +416,12 @@ fun Settings(
           title = { Text("Install with root") },
           summary = { Text("Install apps using su -c pm install instead of the system installer") },
         )
+        switchPreference(
+          key = "skipPreapproval",
+          defaultValue = false,
+          title = { Text("Skip install pre-approval") },
+          summary = { Text("Don't ask the system for approval before downloading") },
+        )
         extraPrivacySettings(context)
         item { HorizontalDivider() }
         preference(

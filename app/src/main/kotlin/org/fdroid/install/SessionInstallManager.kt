@@ -124,7 +124,10 @@ constructor(
     version: PackageVersion,
     canRequestUserConfirmationNow: Boolean,
   ): PreApprovalResult {
-    return if (!context.isAppInForeground()) {
+    return if (RootInstaller.isEnabled(context) || RootInstaller.skipPreapproval(context)) {
+      log.info { "Pre-approval disabled, skipping pre-approval for ${app.packageName}." }
+      PreApprovalResult.NotSupported
+    } else if (!context.isAppInForeground()) {
       log.info { "App not in foreground, pre-approval for ${app.packageName} not supported." }
       PreApprovalResult.NotSupported
     } else if (isUpdate && canDoAutoUpdate(app.packageName, version)) {
