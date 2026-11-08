@@ -376,6 +376,21 @@ constructor(
         )
       }
 
+    if (RootInstaller.isEnabled(context)) {
+      val error = RootInstaller.install(file)
+      return if (error == null) {
+        InstallState.Installed(
+          name = newState.name,
+          versionName = newState.versionName,
+          currentVersionName = newState.currentVersionName,
+          lastUpdated = newState.lastUpdated,
+          iconModel = newState.iconModel,
+        )
+      } else {
+        InstallState.Error(error, newState)
+      }
+    }
+
     // Xiaomi MIUI is known to break the PackageInstaller API in several ways.
     // Disabling MIUI "optimizations" in developer options fixes it,
     // but we can't ask users to do this (bad UX).

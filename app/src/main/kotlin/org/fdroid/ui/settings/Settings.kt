@@ -410,6 +410,12 @@ fun Settings(
           },
           summary = { Text(text = stringResource(R.string.preventScreenshots_summary)) },
         )
+        switchPreference(
+          key = "rootInstall",
+          defaultValue = false,
+          title = { Text("Install with root") },
+          summary = { Text("Install apps using su -c pm install instead of the system installer") },
+        )
         extraPrivacySettings(context)
         item { HorizontalDivider() }
         preference(
