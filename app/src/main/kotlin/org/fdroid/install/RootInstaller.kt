@@ -10,14 +10,14 @@ import mu.KotlinLogging
 /** Installs APKs as root via `su -c pm install`, bypassing PackageInstaller sessions. */
 object RootInstaller {
 
-  const val PREF_KEY_ROOT_INSTALL = "rootInstall"
+  const val PREF_KEY_INSTALL_METHOD = "installMethod"
 
   private val log = KotlinLogging.logger {}
 
   fun isEnabled(context: Context): Boolean =
     context
       .getSharedPreferences("${context.packageName}_preferences", MODE_PRIVATE)
-      .getBoolean(PREF_KEY_ROOT_INSTALL, false)
+      .getString(PREF_KEY_INSTALL_METHOD, "default") == "root"
 
   const val PREF_KEY_SKIP_PREAPPROVAL = "skipPreapproval"
 

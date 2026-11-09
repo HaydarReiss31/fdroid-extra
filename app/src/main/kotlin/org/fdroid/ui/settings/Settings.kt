@@ -410,17 +410,29 @@ fun Settings(
           },
           summary = { Text(text = stringResource(R.string.preventScreenshots_summary)) },
         )
-        switchPreference(
-          key = "rootInstall",
-          defaultValue = false,
-          title = { Text("Install with root") },
-          summary = { Text("Install apps using su -c pm install instead of the system installer") },
-        )
-        switchPreference(
-          key = "shizukuInstall",
-          defaultValue = false,
-          title = { Text("Install with Shizuku") },
-          summary = { Text("Install apps through Shizuku (used before root if both are on)") },
+        listPreference(
+          key = "installMethod",
+          defaultValue = "default",
+          title = { Text("Install method") },
+          summary = { value ->
+            Text(
+              when (value) {
+                "root" -> "Root (su)"
+                "shizuku" -> "Shizuku"
+                else -> "System installer"
+              }
+            )
+          },
+          values = listOf("default", "root", "shizuku"),
+          valueToText = { value: String ->
+            AnnotatedString(
+              when (value) {
+                "root" -> "Root (su)"
+                "shizuku" -> "Shizuku"
+                else -> "System installer"
+              }
+            )
+          },
         )
         switchPreference(
           key = "skipPreapproval",

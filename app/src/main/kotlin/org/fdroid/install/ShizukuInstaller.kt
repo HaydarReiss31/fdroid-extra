@@ -15,7 +15,6 @@ import rikka.shizuku.Shizuku
 /** Installs APKs through Shizuku's shell via `pm install`, bypassing PackageInstaller sessions. */
 object ShizukuInstaller {
 
-  const val PREF_KEY_SHIZUKU_INSTALL = "shizukuInstall"
   private const val REQUEST_CODE = 4711
 
   private val log = KotlinLogging.logger {}
@@ -23,7 +22,7 @@ object ShizukuInstaller {
   fun isEnabled(context: Context): Boolean =
     context
       .getSharedPreferences("${context.packageName}_preferences", MODE_PRIVATE)
-      .getBoolean(PREF_KEY_SHIZUKU_INSTALL, false)
+      .getString(RootInstaller.PREF_KEY_INSTALL_METHOD, "default") == "shizuku"
 
   private fun hasPermission(): Boolean =
     Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
