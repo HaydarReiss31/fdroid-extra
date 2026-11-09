@@ -440,6 +440,12 @@ fun Settings(
           title = { Text("Skip install pre-approval") },
           summary = { Text("Don't ask the system for approval before downloading") },
         )
+        switchPreference(
+          key = "predictiveBackAnim",
+          defaultValue = true,
+          title = { Text("Predictive back animation") },
+          summary = { Text("Slide animation when going back") },
+        )
         extraPrivacySettings(context)
         item { HorizontalDivider() }
         preference(

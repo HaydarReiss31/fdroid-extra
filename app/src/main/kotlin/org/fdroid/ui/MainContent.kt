@@ -1,5 +1,6 @@
 package org.fdroid.ui
 
+import android.content.Context
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -12,6 +13,7 @@ import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneSt
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.Scene
@@ -39,6 +41,7 @@ fun MainContent(
   onBack: () -> Unit,
 ) =
   FDroidContent(dynamicColors = model.dynamicColors) {
+    val context = LocalContext.current
     val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>(directive = directive)
     SharedTransitionLayout {
       HintOverlayContainer {
@@ -77,7 +80,7 @@ fun MainContent(
           sceneStrategies = listOf(listDetailStrategy),
           onBack = onBack,
           popTransitionSpec = {
-            if (initialState.isTopLevel() && targetState.isTopLevel()) {
+            if (!context.slideBackEnabled() || (initialState.isTopLevel() && targetState.isTopLevel())) {
               // switching between bottom bar tabs, no slide animation
               fadeIn() togetherWith fadeOut()
             } else {
@@ -86,7 +89,7 @@ fun MainContent(
             }
           },
           predictivePopTransitionSpec = {
-            if (initialState.isTopLevel() && targetState.isTopLevel()) {
+            if (!context.slideBackEnabled() || (initialState.isTopLevel() && targetState.isTopLevel())) {
               fadeIn() togetherWith fadeOut()
             } else {
               (slideInHorizontally(initialOffsetX = { -it / 4 }) + fadeIn()) togetherWith
@@ -101,3 +104,7 @@ fun MainContent(
 
 /** True if the top entry of this scene is one of the bottom bar tabs. */
 private fun Scene<NavKey>.isTopLevel(): Boolean = entries.lastOrNull()?.contentKey is MainNavKey
+
+private fun Context.slideBackEnabled(): Boolean =
+  getSharedPreferences("${packageName}_preferences", Context.MODE_PRIVATE)
+    .getBoolean("predictiveBackAnim", true)
