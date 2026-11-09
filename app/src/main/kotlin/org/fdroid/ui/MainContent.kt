@@ -100,4 +100,4 @@ fun MainContent(
   }
 
 /** True if the top entry of this scene is one of the bottom bar tabs. */
-private fun Scene<NavKey>.isTopLevel(): Boolean = entries.lastOrNull()?.key is MainNavKey
+private fun Scene<NavKey>.isTopLevel(): Boolean = entries.lastOrNull()?.contentKey is MainNavKey
