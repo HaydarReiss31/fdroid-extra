@@ -14,11 +14,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.scene.Scene
 import androidx.navigation3.ui.NavDisplay
 import com.viktormykhailiv.compose.hints.hintAnchor
 import com.viktormykhailiv.compose.hints.rememberHintAnchorState
 import com.viktormykhailiv.compose.hints.rememberHintController
 import org.fdroid.ui.navigation.BottomBar
+import org.fdroid.ui.navigation.MainNavKey
 import org.fdroid.ui.navigation.NavigationRail
 import org.fdroid.ui.navigation.rememberResponsiveNavigationSceneDecoratorStrategy
 import org.fdroid.ui.utils.HintOverlayContainer
@@ -75,15 +77,27 @@ fun MainContent(
           sceneStrategies = listOf(listDetailStrategy),
           onBack = onBack,
           popTransitionSpec = {
-            (slideInHorizontally(initialOffsetX = { -it / 4 }) + fadeIn()) togetherWith
-              (slideOutHorizontally(targetOffsetX = { it }) + fadeOut())
+            if (initialState.isTopLevel() && targetState.isTopLevel()) {
+              // switching between bottom bar tabs, no slide animation
+              fadeIn() togetherWith fadeOut()
+            } else {
+              (slideInHorizontally(initialOffsetX = { -it / 4 }) + fadeIn()) togetherWith
+                (slideOutHorizontally(targetOffsetX = { it }) + fadeOut())
+            }
           },
           predictivePopTransitionSpec = {
-            (slideInHorizontally(initialOffsetX = { -it / 4 }) + fadeIn()) togetherWith
-              (slideOutHorizontally(targetOffsetX = { it }) + fadeOut())
+            if (initialState.isTopLevel() && targetState.isTopLevel()) {
+              fadeIn() togetherWith fadeOut()
+            } else {
+              (slideInHorizontally(initialOffsetX = { -it / 4 }) + fadeIn()) togetherWith
+                (slideOutHorizontally(targetOffsetX = { it }) + fadeOut())
+            }
           },
           modifier = Modifier.hintAnchor(hintAnchor, fullScreen = true),
         )
       }
     }
   }
+
+/** True if the top entry of this scene is one of the bottom bar tabs. */
+private fun Scene<NavKey>.isTopLevel(): Boolean = entries.lastOrNull()?.key is MainNavKey
