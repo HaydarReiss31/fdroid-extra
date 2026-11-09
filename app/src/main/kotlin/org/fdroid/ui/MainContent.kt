@@ -1,6 +1,11 @@
 package org.fdroid.ui
 
 import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.layout.PaneScaffoldDirective
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
@@ -69,6 +74,14 @@ fun MainContent(
           sceneDecoratorStrategies = listOf(responsiveNavigationSceneDecoratorStrategy),
           sceneStrategies = listOf(listDetailStrategy),
           onBack = onBack,
+          popTransitionSpec = {
+            (slideInHorizontally(initialOffsetX = { -it / 4 }) + fadeIn()) togetherWith
+              (slideOutHorizontally(targetOffsetX = { it }) + fadeOut())
+          },
+          predictivePopTransitionSpec = {
+            (slideInHorizontally(initialOffsetX = { -it / 4 }) + fadeIn()) togetherWith
+              (slideOutHorizontally(targetOffsetX = { it }) + fadeOut())
+          },
           modifier = Modifier.hintAnchor(hintAnchor, fullScreen = true),
         )
       }

@@ -124,11 +124,7 @@ constructor(
     version: PackageVersion,
     canRequestUserConfirmationNow: Boolean,
   ): PreApprovalResult {
-    return if (
-      ShizukuInstaller.isEnabled(context) ||
-        RootInstaller.isEnabled(context) ||
-        RootInstaller.skipPreapproval(context)
-    ) {
+    return if (RootInstaller.skipPreapproval(context)) {
       log.info { "Pre-approval disabled, skipping pre-approval for ${app.packageName}." }
       PreApprovalResult.NotSupported
     } else if (!context.isAppInForeground()) {
