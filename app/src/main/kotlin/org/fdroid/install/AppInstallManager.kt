@@ -376,8 +376,10 @@ constructor(
         )
       }
 
-    if (RootInstaller.isEnabled(context)) {
-      val error = RootInstaller.install(file)
+    if (ShizukuInstaller.isEnabled(context) || RootInstaller.isEnabled(context)) {
+      val error =
+        if (ShizukuInstaller.isEnabled(context)) ShizukuInstaller.install(file)
+        else RootInstaller.install(file)
       return if (error == null) {
         InstallState.Installed(
           name = newState.name,

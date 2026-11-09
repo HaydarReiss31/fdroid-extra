@@ -417,6 +417,12 @@ fun Settings(
           summary = { Text("Install apps using su -c pm install instead of the system installer") },
         )
         switchPreference(
+          key = "shizukuInstall",
+          defaultValue = false,
+          title = { Text("Install with Shizuku") },
+          summary = { Text("Install apps through Shizuku (used before root if both are on)") },
+        )
+        switchPreference(
           key = "skipPreapproval",
           defaultValue = false,
           title = { Text("Skip install pre-approval") },

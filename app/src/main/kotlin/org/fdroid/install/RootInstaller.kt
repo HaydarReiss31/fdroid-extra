@@ -26,36 +26,13 @@ object RootInstaller {
       .getSharedPreferences("${context.packageName}_preferences", MODE_PRIVATE)
       .getBoolean(PREF_KEY_SKIP_PREAPPROVAL, false)
 
-  private val suCandidates =
-    listOf(
-      "su",
-      "/system/bin/su",
-      "/system/xbin/su",
-      "/sbin/su",
-      "/debug_ramdisk/su",
-      "/data/adb/ksu/bin/su",
-      "/data/adb/ap/bin/su",
-    )
-
-  /** Tries several common su locations, since PATH differs between root solutions. */
-  private fun startSu(command: String): Process {
-    var last: Exception? = null
-    for (su in suCandidates) {
-      try {
-        return ProcessBuilder(su, "-c", command).redirectErrorStream(true).start()
-      } catch (e: java.io.IOException) {
-        last = e
-      }
-    }
-    throw last ?: java.io.IOException("su not found")
-  }
-
   /** Returns null on success, otherwise an error message. */
   suspend fun install(apk: File): String? =
     withContext(Dispatchers.IO) {
       try {
         val size = apk.length()
-        val process = startSu("pm install -r -S $size")
+        val process =
+          ProcessBuilder("su", "-c", "pm install -r -S $size").redirectErrorStream(true).start()
         // pm reads the APK from stdin when -S is given
         process.outputStream.use { out -> apk.inputStream().use { it.copyTo(out) } }
         val output = process.inputStream.bufferedReader().readText().trim()

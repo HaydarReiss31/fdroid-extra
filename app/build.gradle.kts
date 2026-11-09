@@ -105,6 +105,8 @@ dependencies {
   implementation(libs.kotlinx.serialization.json)
   implementation(platform(libs.androidx.compose.bom))
   implementation(libs.androidx.core.ktx)
+  implementation("dev.rikka.shizuku:api:13.1.5")
+  implementation("dev.rikka.shizuku:provider:13.1.5")
   implementation(libs.androidx.appcompat)
   implementation(libs.androidx.lifecycle.runtime.ktx)
   implementation(libs.androidx.work.runtime.ktx)
