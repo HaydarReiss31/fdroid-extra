@@ -13,6 +13,7 @@ import androidx.compose.material3.adaptive.layout.PaneScaffoldDirective
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation3.runtime.NavEntry
@@ -43,6 +44,8 @@ fun MainContent(
 ) =
   FDroidContent(dynamicColors = model.dynamicColors) {
     val context = LocalContext.current
+    val tracker = remember { TopKeyTracker() }
+    tracker.update(navEntries.lastOrNull()?.contentKey)
     val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>(directive = directive)
     SharedTransitionLayout {
       HintOverlayContainer {
@@ -81,8 +84,8 @@ fun MainContent(
           sceneStrategies = listOf(listDetailStrategy),
           onBack = onBack,
           transitionSpec = {
-            if (isTabSwitch()) {
-              // switching between bottom bar tabs: no animation at all
+            if (tracker.switchedTabs || isTabSwitch()) {
+              // switching between bottom bar tabs: short fade, no slide
               fadeIn(androidx.compose.animation.core.tween(150)) togetherWith fadeOut(androidx.compose.animation.core.tween(150))
             } else {
               slideInHorizontally(initialOffsetX = { it }) togetherWith
@@ -90,7 +93,7 @@ fun MainContent(
             }
           },
           popTransitionSpec = {
-            if (isTabSwitch()) {
+            if (tracker.switchedTabs || isTabSwitch()) {
               fadeIn(androidx.compose.animation.core.tween(150)) togetherWith fadeOut(androidx.compose.animation.core.tween(150))
             } else if (!context.slideBackEnabled()) {
               fadeIn() togetherWith fadeOut()
@@ -100,7 +103,7 @@ fun MainContent(
             }
           },
           predictivePopTransitionSpec = {
-            if (isTabSwitch()) {
+            if (tracker.onTab || isTabSwitch()) {
               fadeIn(androidx.compose.animation.core.tween(150)) togetherWith fadeOut(androidx.compose.animation.core.tween(150))
             } else if (!context.slideBackEnabled()) {
               fadeIn() togetherWith fadeOut()
@@ -119,9 +122,30 @@ fun MainContent(
  * True if the top entry of this scene is one of the bottom bar tabs. The content key can be the
  * NavKey itself or its string form depending on the Navigation3 version, so both are compared.
  */
-private fun Scene<NavKey>.isTopLevel(): Boolean {
-  val key = entries.lastOrNull()?.contentKey ?: return false
-  return topLevelRoutes.any { it == key || it.toString() == key.toString() }
+private fun Scene<NavKey>.isTopLevel(): Boolean = isTabKey(entries.lastOrNull()?.contentKey)
+
+private fun isTabKey(key: Any?): Boolean =
+  key != null && topLevelRoutes.any { it == key || it.toString() == key.toString() }
+
+/** Remembers the previous and current top entry so tab switches can be detected. */
+private class TopKeyTracker {
+  var previous: Any? = null
+  var current: Any? = null
+
+  fun update(key: Any?) {
+    if (key != current) {
+      previous = current
+      current = key
+    }
+  }
+
+  /** Going from one bottom bar tab to another. */
+  val switchedTabs: Boolean
+    get() = isTabKey(previous) && isTabKey(current)
+
+  /** Currently showing a bottom bar tab, so going back leads to another tab. */
+  val onTab: Boolean
+    get() = isTabKey(current)
 }
 
 private fun AnimatedContentTransitionScope<Scene<NavKey>>.isTabSwitch(): Boolean =
