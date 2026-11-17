@@ -1,6 +1,9 @@
 package org.fdroid.ui
 
 import android.content.Context
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -22,9 +25,9 @@ import com.viktormykhailiv.compose.hints.hintAnchor
 import com.viktormykhailiv.compose.hints.rememberHintAnchorState
 import com.viktormykhailiv.compose.hints.rememberHintController
 import org.fdroid.ui.navigation.BottomBar
-import org.fdroid.ui.navigation.MainNavKey
 import org.fdroid.ui.navigation.NavigationRail
 import org.fdroid.ui.navigation.rememberResponsiveNavigationSceneDecoratorStrategy
+import org.fdroid.ui.navigation.topLevelRoutes
 import org.fdroid.ui.utils.HintOverlayContainer
 
 @Composable
@@ -79,9 +82,19 @@ fun MainContent(
           sceneDecoratorStrategies = listOf(responsiveNavigationSceneDecoratorStrategy),
           sceneStrategies = listOf(listDetailStrategy),
           onBack = onBack,
+          transitionSpec = {
+            if (isTabSwitch()) {
+              // switching between bottom bar tabs: no animation at all
+              EnterTransition.None togetherWith ExitTransition.None
+            } else {
+              slideInHorizontally(initialOffsetX = { it }) togetherWith
+                slideOutHorizontally(targetOffsetX = { -it })
+            }
+          },
           popTransitionSpec = {
-            if (!context.slideBackEnabled() || (initialState.isTopLevel() && targetState.isTopLevel())) {
-              // switching between bottom bar tabs, no slide animation
+            if (isTabSwitch()) {
+              EnterTransition.None togetherWith ExitTransition.None
+            } else if (!context.slideBackEnabled()) {
               fadeIn() togetherWith fadeOut()
             } else {
               (slideInHorizontally(initialOffsetX = { -it / 4 }) + fadeIn()) togetherWith
@@ -89,7 +102,9 @@ fun MainContent(
             }
           },
           predictivePopTransitionSpec = {
-            if (!context.slideBackEnabled() || (initialState.isTopLevel() && targetState.isTopLevel())) {
+            if (isTabSwitch()) {
+              EnterTransition.None togetherWith ExitTransition.None
+            } else if (!context.slideBackEnabled()) {
               fadeIn() togetherWith fadeOut()
             } else {
               (slideInHorizontally(initialOffsetX = { -it / 4 }) + fadeIn()) togetherWith
@@ -102,8 +117,17 @@ fun MainContent(
     }
   }
 
-/** True if the top entry of this scene is one of the bottom bar tabs. */
-private fun Scene<NavKey>.isTopLevel(): Boolean = entries.lastOrNull()?.contentKey is MainNavKey
+/**
+ * True if the top entry of this scene is one of the bottom bar tabs. The content key can be the
+ * NavKey itself or its string form depending on the Navigation3 version, so both are compared.
+ */
+private fun Scene<NavKey>.isTopLevel(): Boolean {
+  val key = entries.lastOrNull()?.contentKey ?: return false
+  return topLevelRoutes.any { it == key || it.toString() == key.toString() }
+}
+
+private fun AnimatedContentTransitionScope<Scene<NavKey>>.isTabSwitch(): Boolean =
+  initialState.isTopLevel() && targetState.isTopLevel()
 
 private fun Context.slideBackEnabled(): Boolean =
   getSharedPreferences("${packageName}_preferences", Context.MODE_PRIVATE)
