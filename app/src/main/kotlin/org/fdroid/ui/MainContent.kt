@@ -2,8 +2,6 @@ package org.fdroid.ui
 
 import android.content.Context
 import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -85,7 +83,7 @@ fun MainContent(
           transitionSpec = {
             if (isTabSwitch()) {
               // switching between bottom bar tabs: no animation at all
-              EnterTransition.None togetherWith ExitTransition.None
+              fadeIn(androidx.compose.animation.core.tween(150)) togetherWith fadeOut(androidx.compose.animation.core.tween(150))
             } else {
               slideInHorizontally(initialOffsetX = { it }) togetherWith
                 slideOutHorizontally(targetOffsetX = { -it })
@@ -93,7 +91,7 @@ fun MainContent(
           },
           popTransitionSpec = {
             if (isTabSwitch()) {
-              EnterTransition.None togetherWith ExitTransition.None
+              fadeIn(androidx.compose.animation.core.tween(150)) togetherWith fadeOut(androidx.compose.animation.core.tween(150))
             } else if (!context.slideBackEnabled()) {
               fadeIn() togetherWith fadeOut()
             } else {
@@ -103,7 +101,7 @@ fun MainContent(
           },
           predictivePopTransitionSpec = {
             if (isTabSwitch()) {
-              EnterTransition.None togetherWith ExitTransition.None
+              fadeIn(androidx.compose.animation.core.tween(150)) togetherWith fadeOut(androidx.compose.animation.core.tween(150))
             } else if (!context.slideBackEnabled()) {
               fadeIn() togetherWith fadeOut()
             } else {
